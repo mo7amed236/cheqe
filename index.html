@@ -1,0 +1,76 @@
+
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>نظام إدارة الشيكات</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+    <script src="https://apis.google.com/js/api.js"></script>
+    <style>
+        /* Styles here (shortened for brevity) */
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>نظام إدارة الشيكات</h1>
+        </div>
+        <!-- Main HTML content here -->
+    </div>
+    <script>
+        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzsCrw8nUfgbAqMQznQj8kLBn2ZwWjGmpW_Qwy4b85A5N0k_Sa9umkwXeD09L9uhfhI4w/exec';
+
+        function loadSavedData() {
+            fetch(WEB_APP_URL)
+                .then(response => response.json())
+                .then(data => {
+                    appState.pendingCheques = data.slice(1).map(row => ({
+                        number: row[0],
+                        amount: row[1],
+                        dueDate: row[2],
+                        customerName: row[3],
+                        bankName: row[4]
+                    }));
+                    renderAllTables();
+                });
+        }
+
+        document.getElementById('chequeForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const newCheque = {
+                number: document.getElementById('chequeNumber').value,
+                amount: document.getElementById('amount').value,
+                dueDate: document.getElementById('dueDate').value,
+                customerName: document.getElementById('customerName').value,
+                bankName: document.getElementById('bankName').value
+            };
+
+            appState.pendingCheques.push(newCheque);
+            renderAllTables();
+            hideAddModal();
+
+            fetch(WEB_APP_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(newCheque)
+            }).then(response => {
+                if (response.ok) {
+                    alert('Cheque added successfully');
+                } else {
+                    alert('Error adding cheque');
+                }
+            });
+
+            this.reset();
+        });
+
+        loadSavedData();
+    </script>
+</body>
+</html>
